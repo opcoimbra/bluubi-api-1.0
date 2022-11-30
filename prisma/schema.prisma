@@ -1,0 +1,54 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        Int         @id @default(autoincrement())
+  name      String
+  email     String      @unique
+  username  String      @unique
+  hash      String
+  createdAt DateTime    @default(now())
+  updatedAt DateTime    @updatedAt
+  token     String?
+  Event     Event[]
+  UserEvent UserEvent[]
+
+  @@map("users")
+}
+
+model Event {
+  id          Int         @id @default(autoincrement())
+  name        String      @unique
+  local       String
+  city        String
+  description String
+  category    Category    @default(NONE)
+  organizer   User        @relation(fields: [userId], references: [id])
+  userId      Int
+  UserEvent   UserEvent[]
+
+  @@map("events")
+}
+
+model UserEvent {
+  id       String @id @default(uuid())
+  id_event Int
+  event    Event  @relation(fields: [id_event], references: [id])
+  id_user  Int
+  user     User   @relation(fields: [id_user], references: [id])
+
+  @@map("users_events")
+}
+
+enum Category {
+  PRIVATE
+  PUBLIC
+  ONLINE
+  NONE
+}
